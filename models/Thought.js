@@ -4,6 +4,13 @@ const { Schema, model } = require('mongoose');
 const moment = require('moment');
 // Schema to create Thought
 const ThoughtSchema = new Schema(
+  /* 
+  expect:
+  {
+    "thoughtText": "this is the first post of xxx",
+    "userName": "5f674c845d34392988ec9101"
+  }
+  */
   {
     thoughtText: {
       type: String,
@@ -17,7 +24,7 @@ const ThoughtSchema = new Schema(
       get: (createdAtVal) =>
         moment(createdAtVal).format('MMM DD, YYYY [at] hh:mm a'),
     },
-    username: [
+    userName: [
       {
         type: Schema.Types.ObjectId,
         ref: 'User',

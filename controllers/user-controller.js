@@ -1,5 +1,5 @@
 // bring User model from index.js inside model
-const { User } = require('../models/index');
+const { User, Thought } = require('../models/index');
 
 // controllers for User model
 const userController = {
@@ -9,6 +9,10 @@ const userController = {
       .populate({
         path: 'friends',
         select: 'userName',
+      })
+      .populate({
+        path: 'thoughts',
+        select: 'thoughtText',
       })
       .select('-__v')
       .then((dbUserData) => {
@@ -25,6 +29,10 @@ const userController = {
       .populate({
         path: 'friends',
         select: 'userName',
+      })
+      .populate({
+        path: 'thoughts',
+        select: 'thoughtText',
       })
       .select('-__v')
       .then((dbUserData) => {
@@ -74,6 +82,13 @@ const userController = {
           return;
         }
         res.json(dbUserData);
+        return dbUserData;
+      })
+      .then(({ thoughts: thoughtIds }) => {
+        const query = { _id: { $in: thoughtIds } };
+        Thought.deleteMany(query, (err, obj) => {
+          if (err) throw err;
+        });
       })
       .catch((err) => {
         console.log('DELETE ONE USER =>', err);

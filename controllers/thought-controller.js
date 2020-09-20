@@ -7,7 +7,7 @@ const thoughtController = {
   getAllThought(req, res) {
     Thought.find({})
       .populate({
-        path: 'username',
+        path: 'userName',
         select: 'userName',
       })
       .select('-__v')
@@ -40,19 +40,41 @@ const thoughtController = {
       });
   },
   // post
-  async createThought({ body }, res) {
+  async createThought({ params, body }, res) {
     let newThought = await Thought.create(body).catch((err) => {
       console.log('CREATE A NEW THOUGHT =>', err);
       res.status(500).json(err);
     });
     let returnNewThought = await newThought
-      .populate({ path: 'username', select: 'userName' })
+      .populate({ path: 'userName', select: 'userName' })
       .execPopulate();
+    // deconstruct and rename _id of the new thought, and the _id of the user
+    let {
+      _id: thoughtId,
+      userName: [{ _id: userId }],
+    } = returnNewThought;
+    // update user model
+    let updateUser = await User.findOneAndUpdate(
+      { _id: userId },
+      { $push: { thoughts: thoughtId } },
+      { new: true },
+    )
+      .then((dbUserData) => {
+        if (!dbUserData) {
+          res.status(404).json({ message: 'No user found with this id' });
+          return;
+        }
+        return;
+      })
+      .catch((err) => {
+        res.status(500).json(err);
+      });
     res.json(returnNewThought);
   },
   // update
   updateThought({ params, body }, res) {
     Thought.findOneAndUpdate({ _id: params.id }, body, { new: true })
+      .select('-__v')
       .then((dbThoughtData) => {
         if (!dbThoughtData) {
           res.status(404).json({ message: 'No thought found with this id' });
@@ -79,6 +101,21 @@ const thoughtController = {
           return;
         }
         res.json(dbThoughtData);
+        return dbThoughtData;
+      })
+      // deconstruct and rename _id of the new thought, and the _id of the user
+      .then(({ _id: thoughtId, username: [{ _id: userId }] }) => {
+        // update Users
+        User.findOneAndUpdate(
+          { _id: userId },
+          { $pull: { thoughts: thoughtId } },
+          { new: true },
+        ).catch((err) => {
+          res.status(500).json(err);
+        });
+      })
+      .catch((err) => {
+        res.json(err);
       });
   },
 };

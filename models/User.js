@@ -2,6 +2,13 @@
 const { Schema, model } = require('mongoose');
 // schema for User model
 const UserSchema = new Schema(
+  /* 
+  expect:
+  {
+    "userName": "Ann",
+    "email": "ann.K@gmail.com"
+  }
+  */
   {
     userName: {
       type: String,
@@ -31,13 +38,16 @@ const UserSchema = new Schema(
   },
   {
     toJSON: {
-      virtual: true,
+      virtuals: true,
     },
     id: false,
   },
 );
 // create a vitual to count the number of firends per user
 UserSchema.virtual('friendCount').get(function () {
+  if (this.friends === undefined) {
+    return;
+  }
   return this.friends.length;
 });
 // create User with UserSchema
