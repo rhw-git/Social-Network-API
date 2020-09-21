@@ -5,10 +5,11 @@ const moment = require('moment');
 // Schema to create Reaction
 const ReactionSchema = new Schema(
   /* 
+  thoughtId: 5f6827dfebbc9b29e4ae5bab
   expect:
   {
     "reactionBody": "This is a nice thought",
-    "username": "5f67e3b7dacb0b1d407bd867"
+    "userName": "5f67e3b7dacb0b1d407bd867"
   }
   */
   {
